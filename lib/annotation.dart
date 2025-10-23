@@ -26,7 +26,7 @@ class Datagen {
     this.toJson = true,
     this.stringify = true,
     this.equality = true,
-    this.omitFactory = false,
+    this.omitFactory = true,
   }) : assert(fromJsonList ? fromJson : true);
 
   /// Enables generating a `copyWith` method for the annotated class.
