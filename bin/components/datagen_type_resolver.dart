@@ -1,8 +1,8 @@
 import 'datagen_parameter.dart';
 
 /// Defines how a specific Dart type should be resolved
-/// to generate code for JSON conversion within the Datagen generator.
-abstract class DatagenJsonResolver {
+/// to generate code for conversion within the Datagen generator.
+abstract class DatagenTypeResolver {
   /// Determines whether this resolver can handle the given parameter type.
   bool canResolve(DatagenParameter param);
 
@@ -14,7 +14,7 @@ abstract class DatagenJsonResolver {
 }
 
 /// Resolves primitive types like int, double, bool, String.
-class PrimitiveResolver implements DatagenJsonResolver {
+class PrimitiveTypeResolver implements DatagenTypeResolver {
   /// List of primitive Dart types that can be directly serialized to JSON.
   static const List<String> jsonPrimitives = [
     "int",
@@ -40,7 +40,7 @@ class PrimitiveResolver implements DatagenJsonResolver {
 }
 
 /// Resolves [DateTime] type.
-class DateTimeResolver implements DatagenJsonResolver {
+class DateTimeTypeResolver implements DatagenTypeResolver {
   @override
   bool canResolve(DatagenParameter param) {
     return param.jsonType == "DateTime";
@@ -60,13 +60,17 @@ class DateTimeResolver implements DatagenJsonResolver {
 }
 
 /// Resolves user-defined datagen models.
-class ObjectResolver implements DatagenJsonResolver {
+class ObjectTypeResolver implements DatagenTypeResolver {
   @override
   bool canResolve(DatagenParameter param) => true;
 
+  String removeGeneric(String value) {
+    return value.replaceAll(RegExp(r'<.*>'), '');
+  }
+
   @override
   String fromJson(DatagenParameter param, String expr) {
-    return "${param.genType}.fromJson($expr)";
+    return "${removeGeneric(param.genType)}.fromJson($expr)";
   }
 
   @override
