@@ -16,6 +16,11 @@ A Dart CLI tool for analyzer-based, extremely fast, and clean **data class** cod
 | 📝 Stringify | 🟢 | @Datagen(stringify: true) |
 
 ## Preview
+<img width="5014" height="2522" alt="웹 1920 – 1" src="https://github.com/user-attachments/assets/f3220742-8d46-4918-bba3-ea85dccd0375" />
+
+### Development
+> When developing, there’s no need to follow any special format like **freezed** or **mappable**. As long as you write proper **const constructors**, the **Datagen** library builder will automatically adjust the code to fit standard Dart conventions. Also, it’s highly recommended to use the `--watch` feature during development!
+
 ![preview](https://github.com/user-attachments/assets/aa776d77-0967-4dd7-9e18-008a78d69c19)
 
 ## Usage
@@ -59,6 +64,23 @@ Arguments for the `@Datagen()` annotation.
 | toJson | Enables generating a toJson method. | true |
 | stringify | Enables generating a toString override method. | true |
 | omitFactory | Controls whether a fromJson factory is generated in the public class. The factory in the generated .datagen.dart class is always created. | false |
+
+## How to Set Config File?
+Create a file named `datagen.json` in the folder where you run the CMD command, and write the following configuration inside:
+
+```json
+{
+    "options": {
+        "copyWith": true,
+        "fromJson": true,
+        "fromJsonList": true,
+        "toJson": true,
+        "stringify": true,
+        "omitFactory": false
+    },
+    "useCommand": true
+}
+```
 
 ## Using VSCode
 You can configure VSCode to automatically run dart run datagen build --watch whenever you open the project folder. This is useful for keeping your code generation up-to-date without manually starting the command each time.

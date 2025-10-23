@@ -1,0 +1,11 @@
+{
+    "options": {
+        "copyWith": true,
+        "fromJson": true,
+        "fromJsonList": true,
+        "toJson": true,
+        "stringify": true,
+        "omitFactory": false
+    },
+    "useCommand": true
+}
