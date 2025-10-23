@@ -21,7 +21,7 @@ A Dart CLI tool for analyzer-based, extremely fast, and clean **data class** cod
 ### Development
 > When developing, there’s no need to follow any special format like **freezed** or **mappable**. As long as you write proper **const constructors**, the **Datagen** library builder will automatically adjust the code to fit standard Dart conventions. Also, it’s highly recommended to use the `--watch` feature during development!
 
-![preview-development](https://github.com/user-attachments/assets/aa776d77-0967-4dd7-9e18-008a78d69c19)
+![preview-development](https://github.com/user-attachments/assets/7386c2a9-cad9-4748-a773-06ab04063762)
 
 ## Usage
 Learn how to quickly set up and use this library for generating data classes.
@@ -76,7 +76,7 @@ Arguments for the `@Datagen()` annotation.
 | fromJson | Enables generating a fromJson factory constructor. | true |
 | toJson | Enables generating a toJson method. | true |
 | stringify | Enables generating a toString override method. | true |
-| equality | Enables generating a `hashCode` and `operator ==` override. | true |
+| equality | Enables generating a hashCode and operator == override. | true |
 | omitFactory | Controls whether a fromJson factory is generated in the public class. The factory in the generated .datagen.dart class is always created. | false |
 
 ## How to Set Config File?
@@ -96,36 +96,9 @@ Create a file named `datagen.json` in the folder where you run the CMD command, 
 }
 ```
 
-## Using VSCode
-You can configure VSCode to automatically run dart run datagen build --watch whenever you open the project folder. This is useful for keeping your code generation up-to-date without manually starting the command each time.
+## IDE Settings Guide
+This table provides quick access to IDE-specific tips and guides.
 
-### Steps:
-1. In the root of your project, create a folder named `.vscode` if it doesn’t already exist.
-
-2. Inside the .vscode folder, create a file called `tasks.json`.
-
-3. Copy and paste the following content into tasks.json:
-
-```json
-{
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Run Datagen Watch",
-      "type": "shell",
-      "command": "dart",
-      "args": ["run", "datagen", "build", "--watch"],
-      "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
-      "presentation": {
-        "echo": true,
-        "reveal": "silent",
-        "focus": false,
-        "panel": "dedicated"
-      }
-    }
-  ]
-}
-```
+| IDE | Docs |
+| --- | ---- |
+| Visual Studio Code | [VSCODE_GUIDE.md](docs/VSCODE_GUIDE.md) |
