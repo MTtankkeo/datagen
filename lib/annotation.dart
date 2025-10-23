@@ -25,6 +25,7 @@ class Datagen {
     this.fromJsonList = true,
     this.toJson = true,
     this.stringify = true,
+    this.equality = true,
     this.omitFactory = false,
   }) : assert(fromJsonList ? fromJson : true);
 
@@ -42,6 +43,9 @@ class Datagen {
 
   /// Enables generating a `toString` override method.
   final bool stringify;
+
+  /// Enables generating a `hashCode` and `operator ==` override.
+  final bool equality;
 
   /// Controls whether a `fromJson` factory is generated in the public class.
   /// The factory in the generated `.datagen.dart` class is always created.

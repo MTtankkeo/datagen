@@ -148,7 +148,7 @@ class ToJsonGenerator extends DatagenJsonGenerator {
 }
 
 /// A class that generates a override `toString`.
-class ToStringGenerator extends DatagenGenerator {
+class StringifyGenerator extends DatagenGenerator {
   @override
   String perform(DatagenClass c) {
     final parameters = c.parameters.map((p) {
@@ -162,6 +162,43 @@ class ToStringGenerator extends DatagenGenerator {
       "\t@override",
       "\tString toString() {",
       "\t\treturn '${c.identifier}(${parameters.join(", ")})';",
+      "\t}",
+    ].join("\n");
+  }
+}
+
+/// A class that generates a override `hashCode` and `operator ==`.
+class EqualityCheckGenerator extends DatagenGenerator {
+  @override
+  String perform(DatagenClass c) {
+    final hashCodeFields = c.parameters.map((p) {
+      /// a.hashCode
+      /// b.hashCode
+      /// c.hashCode
+      return "_${p.name}.hashCode";
+    });
+
+    // Combine all hashCodes into a single expression.
+    final hashCodeExpr = hashCodeFields.length == 1
+        ? hashCodeFields.first
+        : "Object.hash(${hashCodeFields.join(", ")})";
+
+    // Generate equality checks for each field.
+    final equalityChecks = c.parameters.map((p) {
+      return "other.${p.name} == ${p.name}";
+    });
+
+    final equalityCheckExpr = equalityChecks.join(" && ");
+
+    return [
+      "\t@override",
+      "\tint get hashCode => $hashCodeExpr;",
+      "",
+      "\t@override",
+      "\tbool operator ==(Object other) {",
+      "\t\tif (identical(this, other)) return true;",
+      "",
+      "\t\treturn other is ${c.identifier} && $equalityCheckExpr;",
       "\t}",
     ].join("\n");
   }

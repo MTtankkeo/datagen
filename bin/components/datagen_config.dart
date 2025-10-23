@@ -38,6 +38,7 @@ class DatagenConfig {
         fromJsonList: option?["fromJsonList"] ?? datagen.fromJsonList,
         toJson: option?["toJson"] ?? datagen.toJson,
         stringify: option?["stringify"] ?? datagen.stringify,
+        equality: option?["equality"] ?? datagen.equality,
         omitFactory: option?["omitFactory"] ?? datagen.omitFactory,
       ),
       useCommand: config["useCommand"] ?? true,

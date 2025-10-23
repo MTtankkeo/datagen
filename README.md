@@ -11,9 +11,8 @@ A Dart CLI tool for analyzer-based, extremely fast, and clean **data class** cod
 | 🔒 Immutability | 🟢 | Required |
 | 🔄 copyWith (Clone) | 🟢 | @Datagen(copyWith: true) |
 | 📦 JSON serialization | 🟢 | @Datagen(fromJson: true, fromJsonList: true, toJson: true) |
-| ⚖️ Equality check | 🟡 | |
-| 🔑 hashCode | 🟡 | |
 | 📝 Stringify | 🟢 | @Datagen(stringify: true) |
+| ⚖️ Equality | 🟢 | @Datagen(equality: true) |
 
 ## Preview
 <img width="5014" height="2522" alt="웹 1920 – 1" src="https://github.com/user-attachments/assets/f3220742-8d46-4918-bba3-ea85dccd0375" />

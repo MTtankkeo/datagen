@@ -299,7 +299,8 @@ class DatagenBuilder {
         if (e.annotation.fromJson) generators.add(FromJsonGenerator());
         if (e.annotation.fromJsonList) generators.add(FromJsonListGenerator());
         if (e.annotation.toJson) generators.add(ToJsonGenerator());
-        if (e.annotation.stringify) generators.add(ToStringGenerator());
+        if (e.annotation.equality) generators.add(EqualityGenerator());
+        if (e.annotation.stringify) generators.add(StringifyGenerator());
 
         return commandWith(
             command:
