@@ -98,28 +98,55 @@ class DatagenBuilder {
         for (var member in declaration.members) {
           if (member is ConstructorDeclaration) {
             final constructorName = member.name?.lexeme;
+            bool shouldReplace = true;
 
             // Regular constructor (not a factory and unnamed)
             if (member.factoryKeyword == null && constructorName == null) {
+              // Get constructor parameters.
+              final params = SourceFileParser.getParametersConstructor(member);
+              final newArguments = params.map((e) => e.name);
+              final constructorEnd = member.parameters.end;
+
               // Get the first initializer, e.g., `super(a, b, c)`.
               final initializer = member.initializers.firstOrNull;
 
-              if (initializer != null) {
-                final token = initializer.beginToken;
-                final start = token.previous!.previous!.offset + 1;
-                final end = initializer.end;
+              // Checks whether the existing `super` constructor invocation needs
+              // to be replaced by comparing its arguments with the new arguments.
+              if (initializer is SuperConstructorInvocation) {
+                final oldArguments = initializer.argumentList.arguments;
+                final newNames = newArguments.toList();
+                final oldNames = oldArguments.map((e) => e.toSource()).toList();
 
-                // Remove the existing initializer.
-                replaceCode(start, end, "");
+                // If the lengths are different, mark as true immediately.
+                shouldReplace = newNames.length != oldNames.length;
+
+                // If the lengths are the same, compare each argument in order.
+                if (!shouldReplace) {
+                  for (int i = 0; i < newNames.length; i++) {
+                    if (newNames[i] != oldNames[i]) {
+                      shouldReplace = true;
+                      break;
+                    }
+                  }
+                }
               }
 
-              // Get constructor parameters.
-              final params = SourceFileParser.getParametersConstructor(member);
-              final arguments = params.map((e) => e.name);
-              final constructorEnd = member.parameters.end;
+              if (shouldReplace) {
+                // Remove the existing initializer if present.
+                if (initializer != null) {
+                  final token = initializer.beginToken;
+                  final start = token.previous!.previous!.offset + 1;
+                  final end = initializer.end;
 
-              // Insert super constructor call with parameters.
-              insertCode(constructorEnd, " : super(${arguments.join(", ")})");
+                  replaceCode(start, end, "");
+                }
+
+                // Insert super constructor call with parameters.
+                insertCode(
+                  constructorEnd,
+                  " : super(${newArguments.join(", ")})",
+                );
+              }
 
               // Add to DatagenClass list.
               classes.add(
