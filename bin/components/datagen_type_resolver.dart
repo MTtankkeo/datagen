@@ -48,14 +48,12 @@ class DateTimeTypeResolver implements DatagenTypeResolver {
 
   @override
   String fromJson(DatagenParameter param, String expr) {
-    return param.isNullable
-        ? "$expr == null ? null : DateTime.parse($expr!)"
-        : "DateTime.parse($expr)";
+    return "DateTime.parse($expr)";
   }
 
   @override
   String toJson(DatagenParameter param, String expr) {
-    return "$expr${param.isNullable ? "?" : ""}.toIso8601String()";
+    return "$expr${param.isNullable &&  !param.isList ? "?" : ""}.toIso8601String()";
   }
 }
 
@@ -64,17 +62,13 @@ class ObjectTypeResolver implements DatagenTypeResolver {
   @override
   bool canResolve(DatagenParameter param) => true;
 
-  String removeGeneric(String value) {
-    return value.replaceAll(RegExp(r'<.*>'), '');
-  }
-
   @override
   String fromJson(DatagenParameter param, String expr) {
-    return "${removeGeneric(param.genType)}.fromJson($expr)";
+    return "${param.genType}.fromJson($expr)";
   }
 
   @override
-  String toJson(DatagenParameter params, String expr) {
-    return "$expr.toJson()";
+  String toJson(DatagenParameter param, String expr) {
+    return "$expr${param.isNullable && !param.isList ? "?" : ""}.toJson()";
   }
 }

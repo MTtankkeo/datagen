@@ -69,8 +69,10 @@ class FromJsonGenerator extends DatagenJsonGenerator {
 
       // Apply mapping if list, otherwise use resolved value.
       final value = param.isList
-          ? "json['${param.name}'].map<${param.jsonType}>((e) => $resolved).toList()"
-          : resolved;
+          ? "json['${param.name}']?.map<${param.jsonType}>((e) => $resolved).toList()"
+          : param.isNullable
+            ? "$expr == null ? null : $resolved"
+            : resolved;
 
       // Return the Dart code string representing this field's assignment.
       return "\t\t\t${param.name}: $value,";
@@ -111,7 +113,7 @@ class ToJsonGenerator extends DatagenJsonGenerator {
 
       // Apply mapping if list, otherwise use resolved value.
       final value = param.isList
-          ? "${param.name}.map((e) => $resolved).toList()"
+          ? "${param.name}${param.isNullable ? "?" : ""}.map((e) => $resolved).toList()"
           : resolved;
 
       // Return JSON key-value pair string.
@@ -162,12 +164,12 @@ class GetterGenerator extends DatagenGenerator {
     "int": {
       "String": (e) => "$e.toString()",
       "double": (e) => "$e.toDouble()",
-      "num": (e) => "$e",
+      "num": (e) => e,
     },
     "double": {
       "String": (e) => "$e.toString()",
       "int": (e) => "$e.toInt()",
-      "num": (e) => "$e",
+      "num": (e) => e,
     },
     "bool": {
       "String": (e) => "$e.toString()",
