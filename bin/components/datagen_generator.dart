@@ -150,15 +150,53 @@ class ToStringGenerator extends DatagenGenerator {
 
 /// A class that generates a override `toString`.
 class GetterGenerator extends DatagenGenerator {
+  /// Type conversion map: (fromType, toType) -> conversion function
+  static final Map<String, Map<String, String Function(String)>>
+      typeConverters = {
+    "String": {
+      "int": (e) => "int.parse($e)",
+      "double": (e) => "double.parse($e)",
+      "num": (e) => "num.parse($e)",
+      "bool": (e) => "($e.toLowerCase() == 'true')",
+    },
+    "int": {
+      "String": (e) => "$e.toString()",
+      "double": (e) => "$e.toDouble()",
+      "num": (e) => "$e",
+    },
+    "double": {
+      "String": (e) => "$e.toString()",
+      "int": (e) => "$e.toInt()",
+      "num": (e) => "$e",
+    },
+    "bool": {
+      "String": (e) => "$e.toString()",
+    }
+  };
+
   @override
   String perform(DatagenClass c) {
     final parameters = c.parameters.map((p) {
+      String expr = "_${p.name}";
+
+      if (p.setterType != p.getterType) {
+        final convertFunc = typeConverters[p.setterType]?[p.getterType];
+        if (convertFunc == null) {
+          return Exception(
+              "Automatic conversion from '${p.setterType}' to '${p.getterType}' is not supported. "
+              "Supported conversions: ${typeConverters[p.setterType]?.keys.join(', ') ?? 'none'}");
+        }
+
+        expr = convertFunc(expr);
+      }
+
       /// A get a => _a;
       /// B get b => _b;
       /// C get c => _c;
       return DatagenBuilder.commandWith(
-        command: "\t/// Returns the value of [${c.identifier}.${p.name}]",
-        content: "\t${p.type} get ${p.name} => _${p.name};",
+        command:
+            "\t/// Returns the value of [${c.identifier}.${p.name}] as [${p.getterType}]",
+        content: "\t${p.getterType} get ${p.name} => $expr;",
       );
     });
 

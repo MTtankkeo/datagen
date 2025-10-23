@@ -4,20 +4,22 @@
 class DatagenParameter {
   const DatagenParameter({
     required this.name,
-    required this.type,
+    required this.setterType,
+    required this.getterType,
     required this.isRequired,
     required this.defaultValue,
   });
 
   final String name;
-  final String type;
+  final String setterType;
+  final String getterType;
   final bool isRequired;
   final dynamic defaultValue;
 
-  bool get isNullable => type.endsWith("?");
+  bool get isNullable => setterType.endsWith("?");
 
   /// Nullable types (ending with `?`) are normalized before the check.
-  String get typeName => type.replaceFirst("?", "");
+  String get typeName => setterType.replaceFirst("?", "");
 
   /// Returns the class name or, for a List, its element type.
   /// This is the type that has a JSON serialization function.
@@ -46,6 +48,6 @@ class DatagenParameter {
 
   @override
   String toString() {
-    return "DatagenParameter(name: $name, type: $type, isRequired: $isRequired, defaultValue: $defaultValue)";
+    return "DatagenParameter(name: $name, setterType: $setterType, isRequired: $isRequired, defaultValue: $defaultValue)";
   }
 }

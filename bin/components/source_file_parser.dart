@@ -81,6 +81,24 @@ class SourceFileParser {
     return null;
   }
 
+  /// Extracts the type argument from an annotation on a [FormalParameter].
+  static String? getAnnotationType(String identifier, FormalParameter p) {
+    for (final meta in p.metadata) {
+      // An annotation identifier of the given parameter.
+      final metaName = meta.name.name;
+
+      // Check if the annotation is a given identifier.
+      if (metaName == identifier) {
+        final arguments = meta.arguments?.arguments;
+        if (arguments != null && arguments.isNotEmpty) {
+          return arguments.first.toSource(); // int, double, etc.
+        }
+      }
+    }
+
+    return null;
+  }
+
   /// Extracts constructor parameters from [declaration] and converts them
   /// into a list of [DatagenParameter] objects, including name, type,
   /// whether it's required, and any default value.
@@ -89,28 +107,32 @@ class SourceFileParser {
   ) {
     final parameters = declaration.parameters.parameters.map((param) {
       String? name;
-      String? type;
+      String? setterType;
+      String? getterType;
       bool isRequired = false;
       dynamic defaultValue;
 
       if (param is SimpleFormalParameter) {
         name = param.name?.lexeme;
-        type = param.type?.toSource();
+        setterType = param.type?.toSource();
         isRequired = param.requiredKeyword != null;
+        getterType = getAnnotationType("Get", param);
       } else if (param is DefaultFormalParameter) {
         final inner = param.parameter;
 
         if (inner is SimpleFormalParameter) {
           name = inner.name?.lexeme;
-          type = inner.type?.toSource();
+          setterType = inner.type?.toSource();
           isRequired = inner.requiredKeyword != null;
           defaultValue = param.defaultValue?.toSource();
+          getterType = getAnnotationType("Get", inner);
         }
       }
 
       return DatagenParameter(
         name: name!,
-        type: type!,
+        setterType: setterType!,
+        getterType: getterType ?? setterType,
         isRequired: isRequired,
         defaultValue: defaultValue,
       );

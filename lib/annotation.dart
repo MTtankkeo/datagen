@@ -1,4 +1,21 @@
-/// Annotation class used to configure code generation options.
+/// Default [Datagen] annotation with all options enabled.
+const datagen = Datagen();
+
+/// Annotation class used to configure code generation options for a Dart data class.
+///
+/// Applying [Datagen] to a class controls which utility methods and factories
+/// are automatically generated in the companion `.datagen.dart` file.
+///
+/// Example:
+/// ```dart
+/// @Datagen(
+///   copyWith: true,
+///   fromJson: true,
+///   toJson: true,
+///   stringify: true,
+/// )
+/// class MyModel { ... }
+/// ```
 class Datagen {
   /// Creates a [Datagen] annotation with optional flags.
   /// All options default to `true`.
@@ -36,5 +53,22 @@ class Datagen {
   }
 }
 
-/// Default [Datagen] annotation with all options enabled.
-const datagen = Datagen();
+/// Annotation to indicate that a parameter or field should be
+/// automatically converted to the specified type.
+///
+/// Example:
+/// ```dart
+/// const MyModel({
+///   @Get(int) required String age,
+/// });
+/// ```
+///
+/// Here, `age` is stored as a [String], but getters can automatically
+/// convert it to [int].
+class Get {
+  /// Creates a [Get] annotation to specify the target type.
+  const Get(this.type);
+
+  /// The target type for automatic conversion
+  final Type type;
+}

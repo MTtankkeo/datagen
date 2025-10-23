@@ -264,8 +264,9 @@ class DatagenBuilder {
         final generators = <DatagenGenerator>[GetterGenerator()];
         final constructor =
             e.parameters.map((p) => "\t\tthis._${p.name}").join(",\n");
-        final fields =
-            e.parameters.map((p) => "\tfinal ${p.type} _${p.name};").join("\n");
+        final fields = e.parameters
+            .map((p) => "\tfinal ${p.setterType} _${p.name};")
+            .join("\n");
 
         if (e.annotation.copyWith) generators.add(CopyWithGenerator());
         if (e.annotation.fromJson) generators.add(FromJsonGenerator());
