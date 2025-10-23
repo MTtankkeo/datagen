@@ -8,7 +8,8 @@ A Dart CLI tool for analyzer-based, extremely fast, and clean **data class** cod
 
 | Future | Status | Usage |
 | ------ | ------ | ----- |
-| 🔒 Immutability | 🟢 | Required |
+| 🔒 Immutability | 🟢 | It's still required |
+| 🗝️ Private fields | 🟢 | Support private fields with getters. |
 | 🔄 copyWith (Clone) | 🟢 | @Datagen(copyWith: true) |
 | 📦 JSON serialization | 🟢 | @Datagen(fromJson: true, fromJsonList: true, toJson: true) |
 | 📝 Stringify | 🟢 | @Datagen(stringify: true) |
@@ -26,16 +27,29 @@ A Dart CLI tool for analyzer-based, extremely fast, and clean **data class** cod
 Learn how to quickly set up and use this library for generating data classes.
 
 ### Annotate Your Class
-Use the `@datagen` or `@Datagen()` annotation on your class:
+The following is an example of using the `@datagen` or `@Datagen()` annotation on a class. 
+
+> Applying this annotation enables Datagen to generate utility features such as `copyWith`, 
+JSON serialization, stringify, and equality overrides based on the configuration options.
 
 ```dart
-@datagen
+@Datagen(omitFactory: true)
 class A {
   const A({
-    required String a,
-    int b = 3,
-    int? c,
+    required String name,
+    int age = 20,
+    DateTime? dateTime,
+    required dynamic status,
+
+    // Specifies the target type to convert the field to using `@Get`.
+    // Only needs to indicate the target type and the actual type in the data class.
+    @Get(int) required String minute,
   });
+
+  // Use `dynamic` and a custom getter for fields not supported by `@Get`, 
+  // e.g., the `status` field may require custom conversion.
+  @override
+  Enum get status {...}
 }
 ```
 
@@ -62,6 +76,7 @@ Arguments for the `@Datagen()` annotation.
 | fromJson | Enables generating a fromJson factory constructor. | true |
 | toJson | Enables generating a toJson method. | true |
 | stringify | Enables generating a toString override method. | true |
+| equality | Enables generating a `hashCode` and `operator ==` override. | true |
 | omitFactory | Controls whether a fromJson factory is generated in the public class. The factory in the generated .datagen.dart class is always created. | false |
 
 ## How to Set Config File?

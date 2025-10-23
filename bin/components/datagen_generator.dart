@@ -168,7 +168,7 @@ class StringifyGenerator extends DatagenGenerator {
 }
 
 /// A class that generates a override `hashCode` and `operator ==`.
-class EqualityCheckGenerator extends DatagenGenerator {
+class EqualityGenerator extends DatagenGenerator {
   @override
   String perform(DatagenClass c) {
     final hashCodeFields = c.parameters.map((p) {
