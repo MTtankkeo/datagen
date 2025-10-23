@@ -185,7 +185,7 @@ class EqualityGenerator extends DatagenGenerator {
 
     // Generate equality checks for each field.
     final equalityChecks = c.parameters.map((p) {
-      return "other.${p.name} == ${p.name}";
+      return "other._${p.name} == _${p.name}";
     });
 
     final equalityCheckExpr = equalityChecks.join(" && ");
