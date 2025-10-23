@@ -44,15 +44,20 @@ class CopyWithGenerator extends DatagenGenerator {
       return "\t\t\t${p.name}: ${p.name} ?? _${p.name},";
     });
 
-    return [
-      "\t${c.identifier} copyWith({",
-      arguments.join("\n"),
-      "\t}) {",
-      "\t\treturn ${c.identifier}(",
-      parameters.join("\n"),
-      "\t\t);",
-      "\t}",
-    ].join("\n");
+    return DatagenBuilder.commandWith(
+        command:
+            "\t/// Returns a new instance of [${c.identifier}] with the given fields replaced.\n"
+            "\t/// If a field is not provided, the original value is preserved.\n"
+            "\t/// Useful for creating modified copies of immutable objects.",
+        content: [
+          "\t${c.identifier} copyWith({",
+          arguments.join("\n"),
+          "\t}) {",
+          "\t\treturn ${c.identifier}(",
+          parameters.join("\n"),
+          "\t\t);",
+          "\t}",
+        ].join("\n"));
   }
 }
 
@@ -71,20 +76,23 @@ class FromJsonGenerator extends DatagenJsonGenerator {
       final value = param.isList
           ? "json['${param.name}']?.map<${param.jsonType}>((e) => $resolved).toList()"
           : param.isNullable
-            ? "$expr == null ? null : $resolved"
-            : resolved;
+              ? "$expr == null ? null : $resolved"
+              : resolved;
 
       // Return the Dart code string representing this field's assignment.
       return "\t\t\t${param.name}: $value,";
     });
 
-    return [
-      "\tstatic ${c.identifier} fromJson(Map<String, dynamic> json) {",
-      "\t\treturn ${c.identifier}(",
-      parameters.join("\n"),
-      "\t\t);",
-      "\t}",
-    ].join("\n");
+    return DatagenBuilder.commandWith(
+        command:
+            "\t/// Creates an instance of [${c.identifier}] from a JSON map.",
+        content: [
+          "\tstatic ${c.identifier} fromJson(Map<String, dynamic> json) {",
+          "\t\treturn ${c.identifier}(",
+          parameters.join("\n"),
+          "\t\t);",
+          "\t}",
+        ].join("\n"));
   }
 }
 
@@ -92,11 +100,15 @@ class FromJsonGenerator extends DatagenJsonGenerator {
 class FromJsonListGenerator extends DatagenGenerator {
   @override
   String perform(DatagenClass c) {
-    return [
-      "\tstatic List<${c.identifier}> fromJsonList(List list) {",
-      "\t\treturn list.cast<Map<String, dynamic>>().map((json) => fromJson(json)).toList();",
-      "\t}",
-    ].join("\n");
+    return DatagenBuilder.commandWith(
+      command:
+          "\t/// Creates a list of [${c.identifier}] instances from a JSON list.",
+      content: [
+        "\tstatic List<${c.identifier}> fromJsonList(List list) {",
+        "\t\treturn list.cast<Map<String, dynamic>>().map((json) => fromJson(json)).toList();",
+        "\t}",
+      ].join("\n"),
+    );
   }
 }
 
@@ -120,13 +132,18 @@ class ToJsonGenerator extends DatagenJsonGenerator {
       return "\t\t\t'${param.name}': _$value,";
     });
 
-    return [
-      "\tMap<String, dynamic> toJson() {",
-      "\t\treturn {",
-      parameters.join("\n"),
-      "\t\t};",
-      "\t}",
-    ].join("\n");
+    return DatagenBuilder.commandWith(
+      command: //
+          "\t/// Converts this [B] instance into a JSON-compatible map.\n"
+          "\t/// Includes all fields of [B] for serialization purposes.",
+      content: [
+        "\tMap<String, dynamic> toJson() {",
+        "\t\treturn {",
+        parameters.join("\n"),
+        "\t\t};",
+        "\t}",
+      ].join("\n"),
+    );
   }
 }
 
@@ -144,7 +161,7 @@ class ToStringGenerator extends DatagenGenerator {
     return [
       "\t@override",
       "\tString toString() {",
-      "\t\treturn '${c.identifier}(\"${parameters.join(", ")}\")';",
+      "\t\treturn '${c.identifier}(${parameters.join(", ")})';",
       "\t}",
     ].join("\n");
   }

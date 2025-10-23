@@ -53,7 +53,7 @@ class DateTimeTypeResolver implements DatagenTypeResolver {
 
   @override
   String toJson(DatagenParameter param, String expr) {
-    return "$expr${param.isNullable &&  !param.isList ? "?" : ""}.toIso8601String()";
+    return "$expr${param.isNullable && !param.isList ? "?" : ""}.toIso8601String()";
   }
 }
 
