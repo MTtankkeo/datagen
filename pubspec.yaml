@@ -24,6 +24,10 @@ dependencies:
   args: ^2.7.0
   analyzer: ^8.4.0
   path: ^1.9.1
+  prepare:
+    git:
+      url: https://github.com/MTtankkeo/prepare
+      ref: main
 
 dev_dependencies:
   lints: ^6.0.0

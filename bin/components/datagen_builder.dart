@@ -2,18 +2,18 @@ import 'dart:io';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:path/path.dart' as path;
+import 'package:prepare/components/prepare_builder.dart';
+import 'package:prepare/components/source_file.dart';
+import 'package:prepare/components/source_file_edit.dart';
 
-import 'source_file_parser.dart';
-import 'source_file_edit.dart';
-import 'source_file.dart';
 import 'datagen_class.dart';
 import 'datagen_generator.dart';
+import 'datagen_source_parser.dart';
 import 'datagen_config.dart';
 
-import '../datagen.dart';
-
-class DatagenBuilder {
-  const DatagenBuilder._();
+class DatagenBuilder extends PrepareBuilder {
+  @override
+  String get name => "Datagen";
 
   /// List of characters considered as whitespace for trimming purposes.
   /// Includes space, tab, newline, and carriage return.
@@ -46,8 +46,12 @@ class DatagenBuilder {
   ///
   /// Recursively scans the directory, parses Dart files, applies edits,
   /// and generates corresponding `.datagen.dart` files.
-  static void build(SourceFile source) {
-    final stopwatch = Stopwatch()..start();
+  @override
+  Future<bool> build(SourceFile source) async {
+    if (source.path.endsWith(".datagen.dart")) {
+      return false;
+    }
+
     final result = parseString(content: source.text);
     final unit = result.unit;
     final edits = <SourceFileEdit>[];
@@ -79,8 +83,8 @@ class DatagenBuilder {
 
     for (var declaration in unit.declarations) {
       if (declaration is ClassDeclaration) {
-        final annotation = SourceFileParser.getAnnotationByClass(declaration);
-        if (annotation == null) return;
+        final annotation = DatagenSourceParser.getAnnotationByClass(declaration);
+        if (annotation == null) continue;
 
         final rawClassName = declaration.name.lexeme;
         final genClassName = "\$$rawClassName";
@@ -103,7 +107,7 @@ class DatagenBuilder {
             // Regular constructor (not a factory and unnamed)
             if (member.factoryKeyword == null && constructorName == null) {
               // Get constructor parameters.
-              final params = SourceFileParser.getParametersConstructor(member);
+              final params = DatagenSourceParser.getParametersConstructor(member);
               final newArguments = params.map((e) => e.name);
               final constructorEnd = member.parameters.end;
 
@@ -238,7 +242,7 @@ class DatagenBuilder {
       }
     }
 
-    if (classes.isEmpty) return;
+    if (classes.isEmpty) return false;
 
     final fileName = path.basename(source.path);
     final genName = fileName.replaceFirst(".dart", ".datagen.dart");
@@ -325,15 +329,6 @@ class DatagenBuilder {
     }
 
     applyEdits();
-
-    // Stops the stopwatch and calculates the elapsed time.
-    stopwatch.stop();
-
-    // Logs the time taken to build the specified path.
-    final elapsedTime = "${stopwatch.elapsedMilliseconds} ms";
-    log(
-      "Building the specified path: ${source.path} ($elapsedTime)",
-      color: gray,
-    );
+    return true;
   }
 }

@@ -6,8 +6,8 @@ import 'datagen_config.dart';
 
 /// Utility class for parsing Dart source files and extracting metadata,
 /// parameters, and annotations for code generation purposes.
-class SourceFileParser {
-  const SourceFileParser._();
+class DatagenSourceParser {
+  const DatagenSourceParser._();
 
   /// Returns the [Datagen] annotation for a class, or null if none exists.
   static Datagen? getAnnotationByClass(ClassDeclaration declaration) {

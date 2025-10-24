@@ -1,5 +1,6 @@
 import 'package:args/command_runner.dart';
 import 'command/build_command.dart';
+import 'command/watch_command.dart';
 
 // ANSI color codes for console output.
 const red = "\x1B[31m";
@@ -16,7 +17,8 @@ void log(String str, {String color = ""}) {
 void main(List<String> arguments) {
   final runner = CommandRunner("datagen", "A data class generator");
 
-  // Setup command runner with the 'build' command.
+  // Setup command runner with the 'build' and 'watch' command.
   runner.addCommand(BuildCommand());
+  runner.addCommand(WatchCommand());
   runner.run(arguments);
 }

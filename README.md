@@ -19,7 +19,7 @@ A Dart CLI tool for analyzer-based, extremely fast, and clean **data class** cod
 <img width="3449" alt="preview" src="https://github.com/user-attachments/assets/5ffe11c0-aef5-46a4-9f15-e1f8bdfdfeda" />
 
 ### Development
-> When developing, there’s no need to follow any special format like **freezed** or **mappable**. As long as you write proper **const constructors**, the **Datagen** library builder will automatically adjust the code to fit standard Dart conventions. Also, it’s highly recommended to use the `--watch` feature during development!
+> When developing, there’s no need to follow any special format like **freezed** or **mappable**. As long as you write proper **const constructors**, the **Datagen** library builder will automatically adjust the code to fit standard Dart conventions. Also, it’s highly recommended to use the `watch` feature during development!
 
 ![preview-development](https://github.com/user-attachments/assets/7386c2a9-cad9-4748-a773-06ab04063762)
 
@@ -64,7 +64,7 @@ dart run datagen build
 Automatically rebuild on file changes:
 
 ```bash
-dart run datagen build --watch
+dart run datagen watch
 ```
 
 ### Options
