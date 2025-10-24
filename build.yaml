@@ -1,0 +1,13 @@
+targets:
+  $default:
+    builders:
+      datagen:
+        enabled: true
+
+builders:
+  datagen:
+    import: "package:datagen/datagen.dart"
+    builder_factories: ["datagen"]
+    build_extensions: {".dart": [".datagen.dart"]}
+    auto_apply: dependents
+    build_to: source

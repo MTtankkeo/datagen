@@ -64,7 +64,7 @@ class ObjectTypeResolver implements DatagenTypeResolver {
 
   @override
   String fromJson(DatagenParameter param, String expr) {
-    return "${param.genType}.fromJson($expr)";
+    return "${param.jsonType}.fromJson($expr)";
   }
 
   @override
