@@ -1,3 +1,5 @@
+import 'package:analyzer/dart/ast/ast.dart';
+
 import 'datagen_generator.dart';
 
 import '../datagen_class.dart';
@@ -6,9 +8,14 @@ import '../datagen_builder.dart';
 class FactoryClassGenerator extends DatagenGenerator {
   @override
   String perform(DatagenClass c) {
-    final generators = <DatagenGenerator>[_GetterGenerator()];
+    final generators = <DatagenGenerator>[
+      _GetterGenerator(),
+      _ImplementMemberGenerator(),
+    ];
+
     final constructor =
         c.parameters.map((p) => "\t\t${p.expression},\n").join("");
+
     final initializer =
         c.parameters.map((p) => "_${p.name} = ${p.name}").join(", ");
 
@@ -39,11 +46,14 @@ class FactoryClassGenerator extends DatagenGenerator {
   }
 }
 
+/// Signature for a builder that maps a target type name (String)
+/// to a function converting a string expression to that type.
+typedef TypeResolveBuilder = Map<String, String Function(String)>;
+
 /// A class that generates getters.
 class _GetterGenerator extends DatagenGenerator {
-  /// Type conversion map: (fromType, toType) -> conversion function
-  static final Map<String, Map<String, String Function(String)>>
-      typeConverters = {
+  /// Type conversion map: (fromType, toType) -> conversion function.
+  static final Map<String, TypeResolveBuilder> typeConverters = {
     "String": {
       "int": (e) => "int.parse($e)",
       "double": (e) => "double.parse($e)",
@@ -68,32 +78,97 @@ class _GetterGenerator extends DatagenGenerator {
   @override
   String perform(DatagenClass c) {
     final parameters = c.parameters.map((p) {
-      String expr = "_${p.name}";
-
-      if (p.setterType != p.getterType) {
-        final convertFunc = typeConverters[p.setterType]?[p.getterType];
-        if (convertFunc == null) {
-          return Exception(
-              "Automatic conversion from '${p.setterType}' to '${p.getterType}' is not supported. "
-              "Supported conversions: ${typeConverters[p.setterType]?.keys.join(', ') ?? 'none'}");
+      // Locate the instance method that corresponds to the current parameter
+      // so that the generated class can correctly implement or override it.
+      // This ensures the generated subclass faithfully preserves the behavior
+      // expected from the abstract superclass or interface for this member.
+      // Static methods are ignored because they are class-level and do not need
+      // to be implemented in the subclass.
+      final implementedMember = c.implementMembers.where((member) {
+        if (member is MethodDeclaration && member.name.lexeme == p.name) {
+          c.consumeMember(member);
+          return true;
         }
 
-        expr = convertFunc(expr);
-      }
+        return false;
+      }).firstOrNull;
 
-      /// A get a => _a;
-      /// B get b => _b;
-      /// C get c => _c;
-      return DatagenBuilder.commandWith(
-        command:
-            "\t/// Returns the value of [${c.identifier}.${p.name}] as [${p.getterType}].",
-        content: //
-            "\t@override\n"
-            "\t${p.getterType} get ${p.name} => $expr;",
-      );
+      // This ensures that the generated subclass correctly implements or overrides
+      // all necessary members while maintaining type safety and expected behavior.
+      if (implementedMember != null) {
+        // If `implementedMember` exists, it means there is an abstract or inherited
+        // method that we need to override. We retrieve its source, adjust formatting,
+        // and replace any `super` references with the backing field `_name`.
+        final codeSource =
+            _ImplementMemberGenerator.ensureToSubclass(implementedMember);
+        final returnType = (implementedMember as MethodDeclaration).returnType;
+
+        return DatagenBuilder.commandWith(
+          command:
+              "\t/// Returns the value of [${c.identifier}.${p.name}] as [$returnType].",
+          content: codeSource,
+        );
+      } else {
+        // If `implementedMember` is null, there is no method to override, so we
+        // generate a simple getter that returns the corresponding backing field.
+        // If the getter and setter types differ, a type conversion function is applied.
+
+        String expr = "_${p.name}";
+
+        // If the setter and getter types differ, apply a conversion function.
+        if (p.setterType != p.getterType) {
+          final convertFunc = typeConverters[p.setterType]?[p.getterType];
+          if (convertFunc == null) {
+            return Exception(
+              "Automatic conversion from '${p.setterType}' to '${p.getterType}' is not supported. "
+              "Supported conversions: ${typeConverters[p.setterType]?.keys.join(', ') ?? 'none'}",
+            );
+          }
+
+          expr = convertFunc(expr);
+        }
+
+        /// A get a => _a;
+        /// B get b => _b;
+        /// C get c => _c;
+        return DatagenBuilder.commandWith(
+          command:
+              "\t/// Returns the value of [${c.identifier}.${p.name}] as [${p.getterType}].",
+          content: //
+              "\t@override\n"
+              "\t${p.getterType} get ${p.name} => $expr;",
+        );
+      }
     });
 
     return parameters.join("\n\n");
+  }
+}
+
+/// A generator that creates implementations for class members
+/// which have not yet been defined in the generated subclass.
+///
+/// This generator examines the abstract or inherited class and
+/// produces concrete implementations for any missing members,
+/// ensuring that the generated class is complete and type-safe.
+class _ImplementMemberGenerator extends DatagenGenerator {
+  /// Prepares a class member for inclusion in the generated subclass.
+  static String ensureToSubclass(ClassMember member) {
+    String content = member.toSource();
+
+    // Add @override if it's missing to mark this member as overriding.
+    if (!content.startsWith("@override")) {
+      content = "@override\n\t$content";
+    }
+
+    content = content.replaceFirst("@override ", "@override\n\t");
+    content = content.replaceAll("super.", "_");
+    return "\t$content";
+  }
+
+  @override
+  String perform(DatagenClass c) {
+    return c.implementMembers.map(ensureToSubclass).join("\n");
   }
 }
 

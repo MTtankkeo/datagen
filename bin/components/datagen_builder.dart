@@ -140,6 +140,7 @@ class DatagenBuilder extends PrepareBuilder {
                   identifier: declaration.name.lexeme,
                   annotation: annotation,
                   parameters: params,
+                  implementMembers: [],
                 ),
               );
             } else {
@@ -148,14 +149,20 @@ class DatagenBuilder extends PrepareBuilder {
                 fromJsonConstructor = member;
               }
             }
-          } else {
-            if (member is MethodDeclaration) {
-              final methodName = member.name.lexeme;
+          }
 
-              // A static method for `fromJsonList`.
+          if (member is MethodDeclaration) {
+            final methodName = member.name.lexeme;
+
+            if (member.isStatic) {
+              // Check for a static method named `fromJsonList` and store it.
               if (methodName == "fromJsonList") {
                 fromJsonListMethod = member;
               }
+            } else {
+              // Add only non-static members (methods, getters, setters) to the list
+              // of members that need to be implemented in the generated subclass.
+              datagen?.implementMembers.add(member);
             }
           }
         }
