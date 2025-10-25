@@ -1,6 +1,6 @@
 ## Using VSCode
 
-You can configure VSCode to automatically run `dart run datagen build --watch` whenever you open the project folder. This keeps your code generation up-to-date without manually starting the command each time. Additionally, you can hide the generated `.datagen.dart` files in VSCode for a cleaner workspace.
+You can configure VSCode to automatically run `dart run prepare watch` whenever you open the project folder. This keeps your code generation up-to-date without manually starting the command each time. Additionally, you can hide the generated `.datagen.dart` files in VSCode for a cleaner workspace.
 
 ### Steps
 
@@ -13,10 +13,10 @@ You can configure VSCode to automatically run `dart run datagen build --watch` w
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run Datagen Watch",
+      "label": "Run Prepare Watch",
       "type": "shell",
       "command": "dart",
-      "args": ["run", "datagen", "build", "--watch"],
+      "args": ["run", "prepare", "watch"],
       "problemMatcher": [],
       "runOptions": {
         "runOn": "folderOpen"
