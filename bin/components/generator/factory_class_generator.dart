@@ -99,14 +99,14 @@ class _GetterGenerator extends DatagenGenerator {
         // If `implementedMember` exists, it means there is an abstract or inherited
         // method that we need to override. We retrieve its source, adjust formatting,
         // and replace any `super` references with the backing field `_name`.
-        final codeSource =
-            _ImplementMemberGenerator.ensureToSubclass(implementedMember);
-        final returnType = (implementedMember as MethodDeclaration).returnType;
+        final member = implementedMember;
+        final source = _ImplementMemberGenerator.ensureToSubclass(member);
+        final returnType = (member as MethodDeclaration).returnType;
 
         return DatagenBuilder.commandWith(
           command:
               "\t/// Returns the value of [${c.identifier}.${p.name}] as [$returnType].",
-          content: codeSource,
+          content: source,
         );
       } else {
         // If `implementedMember` is null, there is no method to override, so we

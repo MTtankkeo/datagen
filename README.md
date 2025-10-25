@@ -16,12 +16,12 @@ A Dart CLI tool for analyzer-based, extremely fast, and clean **data class** cod
 | ⚖️ Equality | 🟢 | @Datagen(equality: true) |
 
 ## Preview
-<img width="3449" alt="preview" src="https://github.com/user-attachments/assets/5ffe11c0-aef5-46a4-9f15-e1f8bdfdfeda" />
+<img width="4408" alt="preview" src="https://github.com/user-attachments/assets/57d20180-2df3-447c-8622-b8553f25e9a8" />
 
 ### Development
 > When developing, there’s no need to follow any special format like **freezed** or **mappable**. As long as you write proper **const constructors**, the **Datagen** library builder will automatically adjust the code to fit standard Dart conventions. Also, it’s highly recommended to use the `watch` feature during development!
 
-![preview-development](https://github.com/user-attachments/assets/7386c2a9-cad9-4748-a773-06ab04063762)
+![preview-development](https://github.com/user-attachments/assets/33c09246-0ec8-44e1-b9f0-28ef95e8cb1c)
 
 ## Usage
 Learn how to quickly set up and use this library for generating data classes.
