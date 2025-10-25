@@ -15,6 +15,9 @@ class DatagenBuilder extends PrepareBuilder {
   @override
   String get name => "Datagen";
 
+  @override
+  List<String> get extensions => [".dart"];
+
   /// List of characters considered as whitespace for trimming purposes.
   /// Includes space, tab, newline, and carriage return.
   static const _whitespaceChars = [' ', '\t', '\n', '\r'];
@@ -83,7 +86,8 @@ class DatagenBuilder extends PrepareBuilder {
 
     for (var declaration in unit.declarations) {
       if (declaration is ClassDeclaration) {
-        final annotation = DatagenSourceParser.getAnnotationByClass(declaration);
+        final annotation =
+            DatagenSourceParser.getAnnotationByClass(declaration);
         if (annotation == null) continue;
 
         final rawClassName = declaration.name.lexeme;
@@ -107,7 +111,8 @@ class DatagenBuilder extends PrepareBuilder {
             // Regular constructor (not a factory and unnamed)
             if (member.factoryKeyword == null && constructorName == null) {
               // Get constructor parameters.
-              final params = DatagenSourceParser.getParametersConstructor(member);
+              final params =
+                  DatagenSourceParser.getParametersConstructor(member);
               final newArguments = params.map((e) => e.name);
               final constructorEnd = member.parameters.end;
 
