@@ -7,9 +7,11 @@ import 'package:prepare/components/source_file.dart';
 import 'package:prepare/components/source_file_edit.dart';
 
 import 'datagen_class.dart';
-import 'datagen_generator.dart';
+import 'generator/datagen_generator.dart';
 import 'datagen_source_parser.dart';
 import 'datagen_config.dart';
+import 'generator/factory_class_generator.dart';
+import 'generator/abstract_class_generator.dart';
 
 class DatagenBuilder extends PrepareBuilder {
   @override
@@ -94,67 +96,42 @@ class DatagenBuilder extends PrepareBuilder {
         final genClassName = "\$$rawClassName";
         DatagenClass? datagen;
 
-        if (declaration.extendsClause == null) {
-          final classEnd = declaration.name.end;
-
-          insertCode(classEnd, " extends \$$rawClassName");
-        }
-
         ConstructorDeclaration? fromJsonConstructor;
         MethodDeclaration? fromJsonListMethod;
+
+        // If the class does not already extend another class, inserts an `extends`
+        // clause to make it extend the generated base class `_rawClassName`
+        if (declaration.extendsClause == null) {
+          final classEnd = declaration.name.end;
+          insertCode(classEnd, " extends _$rawClassName");
+        }
 
         for (var member in declaration.members) {
           if (member is ConstructorDeclaration) {
             final constructorName = member.name?.lexeme;
-            bool shouldReplace = true;
 
             // Regular constructor (not a factory and unnamed)
-            if (member.factoryKeyword == null && constructorName == null) {
+            if (constructorName == null) {
               // Get constructor parameters.
               final params =
                   DatagenSourceParser.getParametersConstructor(member);
-              final newArguments = params.map((e) => e.name);
-              final constructorEnd = member.parameters.end;
 
-              // Get the first initializer, e.g., `super(a, b, c)`.
-              final initializer = member.initializers.firstOrNull;
-
-              // Checks whether the existing `super` constructor invocation needs
-              // to be replaced by comparing its arguments with the new arguments.
-              if (initializer is SuperConstructorInvocation) {
-                final oldArguments = initializer.argumentList.arguments;
-                final newNames = newArguments.toList();
-                final oldNames = oldArguments.map((e) => e.toSource()).toList();
-
-                // If the lengths are different, mark as true immediately.
-                shouldReplace = newNames.length != oldNames.length;
-
-                // If the lengths are the same, compare each argument in order.
-                if (!shouldReplace) {
-                  for (int i = 0; i < newNames.length; i++) {
-                    if (newNames[i] != oldNames[i]) {
-                      shouldReplace = true;
-                      break;
-                    }
-                  }
+              if (member.factoryKeyword != null) {
+                // Already a factory, check if const needs to be added
+                if (member.constKeyword == null) {
+                  insertCode(member.offset, "const ");
                 }
+              } else if (member.constKeyword != null) {
+                // Const constructor, add factory after const
+                insertCode(member.constKeyword!.end, " factory");
+              } else {
+                // Regular constructor, add const factory at the start
+                insertCode(member.offset, "const factory ");
               }
 
-              if (shouldReplace) {
-                // Remove the existing initializer if present.
-                if (initializer != null) {
-                  final token = initializer.beginToken;
-                  final start = token.previous!.previous!.offset + 1;
-                  final end = initializer.end;
-
-                  replaceCode(start, end, "");
-                }
-
-                // Insert super constructor call with parameters.
-                insertCode(
-                  constructorEnd,
-                  " : super(${newArguments.join(", ")})",
-                );
+              // Insert redirected constructor if missing
+              if (member.redirectedConstructor == null) {
+                insertCode(member.endToken.previous!.end, " = $genClassName");
               }
 
               // Add to DatagenClass list.
@@ -171,14 +148,14 @@ class DatagenBuilder extends PrepareBuilder {
                 fromJsonConstructor = member;
               }
             }
-          }
+          } else {
+            if (member is MethodDeclaration) {
+              final methodName = member.name.lexeme;
 
-          if (member is MethodDeclaration) {
-            final methodName = member.name.lexeme;
-
-            // A static method for `fromJsonList`.
-            if (methodName == "fromJsonList") {
-              fromJsonListMethod = member;
+              // A static method for `fromJsonList`.
+              if (methodName == "fromJsonList") {
+                fromJsonListMethod = member;
+              }
             }
           }
         }
@@ -252,8 +229,7 @@ class DatagenBuilder extends PrepareBuilder {
     final fileName = path.basename(source.path);
     final genName = fileName.replaceFirst(".dart", ".datagen.dart");
     final genPath = path.join(path.dirname(source.path), genName);
-    final imports = unit.directives.whereType<ImportDirective>();
-    final exports = unit.directives.whereType<ExportDirective>();
+    final parts = unit.directives.whereType<Directive>();
 
     // Check if the generated datagen file is already imported,
     // and insert it at the top of the file if not.
@@ -261,76 +237,37 @@ class DatagenBuilder extends PrepareBuilder {
       bool isExists = false;
 
       // If the generated datagen file is already imported, mark it.
-      for (final directive in imports) {
-        if (directive.uri.stringValue == genName) {
-          isExists = true;
-          break;
+      for (final directive in parts) {
+        if (directive is PartDirective) {
+          if (directive.uri.stringValue == genName) {
+            isExists = true;
+            break;
+          }
         }
       }
 
       if (!isExists) {
-        insertCode(0, "import '$genName';\n\n");
-      }
-    }
-
-    // Check if the generated datagen file is already exported,
-    // and insert it at the top of the file if not.
-    {
-      bool isExists = false;
-
-      // If the generated datagen file is already exported, mark it.
-      for (final directive in exports) {
-        if (directive.uri.stringValue == genName) {
-          isExists = true;
-          break;
-        }
-      }
-
-      if (!isExists) {
-        insertCode(0, "export '$genName';\n");
+        final index = parts.lastOrNull?.end ?? 0;
+        insertCode(index, "\n\npart '$genName';");
       }
     }
 
     {
       // Create datagen.dart file.
-      final start = imports.firstOrNull?.offset ?? 0;
-      final end = imports.lastOrNull?.end ?? 0;
-      final importText = source.text.substring(start, end);
-      final datagenText = classes.map((e) {
-        final generators = <DatagenGenerator>[GetterGenerator()];
-        final constructor =
-            e.parameters.map((p) => "\t\tthis._${p.name}").join(",\n");
-        final fields = e.parameters
-            .map((p) => "\tfinal ${p.setterType} _${p.name};")
-            .join("\n");
+      final generatedText = classes.map((c) {
+        final generators = <DatagenGenerator>[
+          AugmentClassGenerator(),
+          FactoryClassGenerator(),
+        ];
 
-        if (e.annotation.copyWith) generators.add(CopyWithGenerator());
-        if (e.annotation.fromJson) generators.add(FromJsonGenerator());
-        if (e.annotation.fromJsonList) generators.add(FromJsonListGenerator());
-        if (e.annotation.toJson) generators.add(ToJsonGenerator());
-        if (e.annotation.equality) generators.add(EqualityGenerator());
-        if (e.annotation.stringify) generators.add(StringifyGenerator());
-
-        return commandWith(
-            command:
-                "/// A class that provides an auto-completion implementation for [${e.identifier}].",
-            content: [
-              "class \$${e.identifier} {",
-              "\tconst \$${e.identifier}(\n$constructor\n\t);",
-              "",
-              fields,
-              "",
-              generators.map((g) => g.perform(e)).join("\n\n"),
-              "}\n",
-            ].nonNulls.join("\n"));
+        return generators.map((g) => g.perform(c)).join("\n");
       }).join("\n");
 
-      File(genPath).writeAsStringSync(
-        "// ignore_for_file: unused_import, unnecessary_question_mark\n\n"
-        "import '$fileName';\n"
-        "$importText\n\n"
-        "$datagenText",
-      );
+      File(genPath).writeAsStringSync([
+        "// ignore_for_file: unused_import, unnecessary_question_mark",
+        "part of '$fileName';",
+        generatedText,
+      ].join("\n\n"));
     }
 
     applyEdits();

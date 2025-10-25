@@ -110,12 +110,13 @@ class DatagenSourceParser {
       String? setterType;
       String? getterType;
       bool isRequired = false;
-      dynamic defaultValue;
+      dynamic expression;
 
       if (param is SimpleFormalParameter) {
         name = param.name?.lexeme;
         setterType = param.type?.toSource();
         isRequired = param.requiredKeyword != null;
+        expression = param.toSource();
         getterType = getAnnotationType("Get", param);
       } else if (param is DefaultFormalParameter) {
         final inner = param.parameter;
@@ -124,7 +125,7 @@ class DatagenSourceParser {
           name = inner.name?.lexeme;
           setterType = inner.type?.toSource();
           isRequired = inner.requiredKeyword != null;
-          defaultValue = param.defaultValue?.toSource();
+          expression = inner.toSource();
           getterType = getAnnotationType("Get", inner);
         }
       }
@@ -134,7 +135,7 @@ class DatagenSourceParser {
         setterType: setterType!,
         getterType: getterType ?? setterType,
         isRequired: isRequired,
-        defaultValue: defaultValue,
+        expression: expression,
       );
     }).toList();
 

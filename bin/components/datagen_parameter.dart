@@ -7,14 +7,14 @@ class DatagenParameter {
     required this.setterType,
     required this.getterType,
     required this.isRequired,
-    required this.defaultValue,
+    required this.expression,
   });
 
   final String name;
   final String setterType;
   final String getterType;
   final bool isRequired;
-  final dynamic defaultValue;
+  final String expression;
 
   bool get isNullable => setterType.endsWith("?");
 
@@ -48,6 +48,6 @@ class DatagenParameter {
 
   @override
   String toString() {
-    return "DatagenParameter(name: $name, setterType: $setterType, isRequired: $isRequired, defaultValue: $defaultValue)";
+    return "DatagenParameter(name: $name, setterType: $setterType, isRequired: $isRequired, expression: $expression)";
   }
 }
