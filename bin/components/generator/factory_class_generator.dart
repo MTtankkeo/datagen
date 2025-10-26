@@ -30,6 +30,12 @@ class FactoryClassGenerator extends DatagenGenerator {
     if (c.annotation.fromJson) generators.add(_FromJsonGenerator());
     if (c.annotation.fromJsonList) generators.add(_FromJsonListGenerator());
 
+    // To removal unnecessary syntax.
+    final generatorResult = generators
+        .map((g) => g.perform(c))
+        .where((e) => e.trim().isNotEmpty)
+        .join("\n\n");
+
     return DatagenBuilder.commandWith(
       command:
           "/// A class that provides an auto-completion implementation for [${c.identifier}].",
@@ -39,7 +45,7 @@ class FactoryClassGenerator extends DatagenGenerator {
         "",
         fields,
         "",
-        generators.map((g) => g.perform(c)).join("\n\n"),
+        generatorResult,
         "}\n",
       ].nonNulls.join("\n"),
     );
