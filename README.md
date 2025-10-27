@@ -67,6 +67,9 @@ Automatically rebuild on file changes:
 dart run datagen watch
 ```
 
+> [!TIP]
+> **Build Integration:** To integrate and manage build processes with tools like [resourcegen](https://github.com/MTtankkeo/resourcegen), learn how to use [Prepare](https://github.com/MTtankkeo/prepare) effectively.
+
 ### Options
 Arguments for the `@Datagen()` annotation.
 
