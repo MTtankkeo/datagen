@@ -29,5 +29,8 @@ jobs:
       - name: Run Flutter Analyzer
         run: flutter analyze --fatal-warnings
 
-      # - name: Run Unit & Widget Tests
-      #   run: flutter test .
+      - name: Run Datagen Build
+        run: dart run datagen build
+
+      - name: Run Unit & Widget Tests
+        run: flutter test .

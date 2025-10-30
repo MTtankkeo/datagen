@@ -2,4 +2,7 @@
 # Created by `dart pub`
 .dart_tool/
 
+# Generated files for datagen. (exclude from tests and analysis)
+*.datagen.dart
+
 pubspec.lock
