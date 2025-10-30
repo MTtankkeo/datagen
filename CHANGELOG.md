@@ -6,3 +6,6 @@
 
 ## 1.0.2
 - Updated the `prepare` dependency to the latest version.
+
+## 1.0.3
+- Fixed an issue where `hashCode` generation could fail for objects with more than 20 fields by using `hashAll`.

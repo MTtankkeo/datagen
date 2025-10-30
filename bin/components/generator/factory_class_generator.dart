@@ -197,20 +197,21 @@ class _CopyWithGenerator extends DatagenGenerator {
     });
 
     return DatagenBuilder.commandWith(
-        command:
-            "\t/// Returns a new instance of [${c.identifier}] with the given fields replaced.\n"
-            "\t/// If a field is not provided, the original value is preserved.\n"
-            "\t/// Useful for creating modified copies of immutable objects.",
-        content: [
-          "\t@override",
-          "\t${c.identifier} copyWith({",
-          arguments.join("\n"),
-          "\t}) {",
-          "\t\treturn ${c.identifier}(",
-          parameters.join("\n"),
-          "\t\t);",
-          "\t}",
-        ].join("\n"));
+      command:
+          "\t/// Returns a new instance of [${c.identifier}] with the given fields replaced.\n"
+          "\t/// If a field is not provided, the original value is preserved.\n"
+          "\t/// Useful for creating modified copies of immutable objects.",
+      content: [
+        "\t@override",
+        "\t${c.identifier} copyWith({",
+        arguments.join("\n"),
+        "\t}) {",
+        "\t\treturn ${c.identifier}(",
+        parameters.join("\n"),
+        "\t\t);",
+        "\t}",
+      ].join("\n"),
+    );
   }
 }
 
@@ -284,7 +285,7 @@ class _EqualityGenerator extends DatagenGenerator {
     // Combine all hashCodes into a single expression.
     final hashCodeExpr = hashCodeFields.length == 1
         ? hashCodeFields.first
-        : "Object.hash(${hashCodeFields.join(", ")})";
+        : "Object.hashAll([${hashCodeFields.join(", ")}])";
 
     // Generate equality checks for each field.
     final equalityChecks = c.parameters.map((p) {

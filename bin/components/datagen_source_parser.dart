@@ -34,6 +34,7 @@ class DatagenSourceParser {
         bool? fromJsonListEnabled;
         bool? toJsonEnabled;
         bool? stringifyEnabled;
+        bool? equalityEnabled;
         bool? omitFactoryEnabled;
 
         final arguments = meta.arguments?.arguments;
@@ -60,6 +61,9 @@ class DatagenSourceParser {
               case "stringify":
                 stringifyEnabled = getOptionValue(arg, name);
                 break;
+              case "equality":
+                equalityEnabled = getOptionValue(arg, name);
+                break;
               case "omitFactory":
                 omitFactoryEnabled = getOptionValue(arg, name);
                 break;
@@ -73,6 +77,7 @@ class DatagenSourceParser {
           fromJsonList: fromJsonListEnabled ?? options.fromJsonList,
           toJson: toJsonEnabled ?? options.toJson,
           stringify: stringifyEnabled ?? options.stringify,
+          equality: equalityEnabled ?? options.equality,
           omitFactory: omitFactoryEnabled ?? options.omitFactory,
         );
       }

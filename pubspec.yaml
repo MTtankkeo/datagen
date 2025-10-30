@@ -1,6 +1,6 @@
 name: datagen
 description: A Dart CLI tool for analyzer-based, extremely fast and clean data class code generation.
-version: 1.0.2
+version: 1.0.3
 publisher: ttankkeo112@gmail.com
 repository: https://github.com/MTtankkeo/datagen
 keywords:
