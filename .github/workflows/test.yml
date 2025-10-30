@@ -1,0 +1,33 @@
+name: Flutter Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: main # latest version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check Dart Format
+        run: dart format --set-exit-if-changed .
+
+      - name: Run Flutter Analyzer
+        run: flutter analyze --fatal-warnings
+
+      # - name: Run Unit & Widget Tests
+      #   run: flutter test .
