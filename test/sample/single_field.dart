@@ -1,5 +1,7 @@
 import 'package:datagen/annotation.dart';
 
+import 'enum.dart';
+
 part 'single_field.datagen.dart';
 
 @datagen
